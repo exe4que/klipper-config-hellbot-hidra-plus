@@ -38,7 +38,7 @@
 ```
 prep_print EXTRUDER={...} BED={...} CHAMBER={...} FILAMENT={...} COUNT={...} TOOLS={...} NUM=1
 ```
-El macro alternativo `START_PRINT` asume que las temperaturas ya fueron seteadas por el slicer.
+El macro alternativo `START_PRINT` usa los targets ya seteados por el slicer o acepta `BED_TEMP`, `T0_TEMP`, `T1_TEMP`, `INITIAL_TOOL` y opcionalmente `TOOLS` o `USED_TOOLS`; solo calienta y hace prime del o los extrusores con target mayor a 0. Si el slicer pasa temperaturas por parámetro, cualquier extrusor omitido se considera no usado (`0`). Si además pasa `TOOLS={total_toolchanges}`, `START_PRINT` distingue impresión simple (`TOOLS=0`) de dual (`TOOLS>0`); `USED_TOOLS` queda como override manual.
 
 **Historial de cambios / problemas resueltos:**
 - `max_accel_to_decel` → reemplazado por `minimum_cruise_ratio: 0.5` (opción deprecada en Klipper moderno)
@@ -63,7 +63,7 @@ El macro alternativo `START_PRINT` asume que las temperaturas ya fueron seteadas
 - `printer.cfg` is the entrypoint and composition root. It includes `kiauh_macros.cfg`, `macros.cfg`, `variables.cfg`, `PREP_PRINT.cfg`, and one active extruder profile. At the moment the active include is `extruders_std/printer.cfg`; the Titan-related includes are present but commented out.
 - `printer.cfg` owns machine-level wiring and motion settings: MCU/board pin aliases, cartesian + dual-carriage kinematics, steppers, Z tilt, probe, bed mesh defaults, heaters, fans, idle timeout, and filament/runout handling.
 - `macros.cfg` is where most behavior lives: tool parking and switching (`T0`/`T1`), carriage range/offset logic, priming, print start/end flows, bed mesh creation/loading, and helper introspection macros.
-- `PREP_PRINT.cfg` is a second start-of-print path that expects slicer parameters such as `EXTRUDER`, `BED`, `COUNT`, and `TOOLS` (the header shows the intended SuperSlicer invocation). Keep it distinct from `START_PRINT`, which assumes heater targets were already set by the slicer.
+- `PREP_PRINT.cfg` is a second start-of-print path that expects slicer parameters such as `EXTRUDER`, `BED`, `COUNT`, and `TOOLS` (the header shows the intended SuperSlicer invocation). Keep it distinct from `START_PRINT`, which can either reuse heater targets already set by the slicer or receive `BED_TEMP`, `T0_TEMP`, `T1_TEMP`, `INITIAL_TOOL`, and optionally `TOOLS` or `USED_TOOLS`; only non-zero extruder targets are heated and primed. When temperature params are provided, any omitted extruder temperature is treated as zero; if `TOOLS={total_toolchanges}` is also present, `TOOLS=0` means single-tool prime/heat and `TOOLS>0` means dual preheat/prime. `USED_TOOLS` remains available as a manual override.
 - `variables.cfg` stores persisted macro state via `[save_variables]`.
 - `moonraker.conf` is separate service configuration for Moonraker, including authorization and update-manager entries for Mainsail and Fluidd.
 - `extruders_titan/` contains alternate hardware-specific snippets for Titan/heatblock combinations. Those snippets override only the parts that differ from the default profile and are meant to be swapped in via `printer.cfg` includes.
