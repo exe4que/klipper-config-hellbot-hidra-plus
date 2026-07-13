@@ -1,0 +1,5 @@
+ ; Start G-code
+ START_PRINT BED_TEMP=[bed_temperature_initial_layer_single] INITIAL_TOOL=[initial_tool] TOOLS=[total_toolchanges] {if is_extruder_used[0]}T0_TEMP={first_layer_temperature[0]} {endif}{if is_extruder_used[1]}T1_TEMP={first_layer_temperature[1]}{endif}
+
+ ; End G-code
+ END_PRINT
